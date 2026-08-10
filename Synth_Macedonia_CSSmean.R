@@ -1,6 +1,6 @@
 # ============================================================================
-# Synth_Turkey_CSSmean.R
-# Synthetic control for Turkey: cssmean ~ autocracy
+# Synth_Macedonia_CSSmean.R
+# Synthetic control for Macedonia: cssmean ~ autocracy
 # ============================================================================
 
 if (!requireNamespace("Synth", quietly = TRUE)) install.packages("Synth")
@@ -12,17 +12,17 @@ library(ggplot2)
 input_path <- "Data/cy_operationalized.rds"
 data <- readRDS(input_path)
 
-# Filter for Turkey and donor pool (countries with no autocracy transition)
+# Filter for Macedonia and donor pool (countries with no autocracy transition)
 data <- data %>% arrange(country, year)
 
-target_country <- data %>% filter(country == "Turkey")
+target_country <- data %>% filter(country == "Macedonia")
 
-# Identify Turkey's transition year (first year autocracy == 1 after 0)
+# Identify Macedonia's transition year (first year autocracy == 1 after 0)
 target_country <- target_country %>% mutate(autocracy_lag = lag(autocracy))
 transition_year <- target_country$year[which(target_country$autocracy_lag == 0 & target_country$autocracy == 1)[1]]
-if (is.na(transition_year)) stop("No autocracy transition found for Turkey.")
+if (is.na(transition_year)) stop("No autocracy transition found for Macedonia.")
 
-cat("Transition year for Turkey:", transition_year, "\n")
+cat("Transition year for Macedonia:", transition_year, "\n")
 
 # Define pre- and post-treatment periods
 pre_period <- min(target_country$year):(transition_year - 1)
@@ -32,7 +32,7 @@ post_period <- transition_year:max(target_country$year)
 donor_countries <- data %>% group_by(country) %>% summarise(max_autocracy = max(autocracy, na.rm = TRUE)) %>% filter(max_autocracy == 0) %>% pull(country)
 
 # Prepare data for Synth
-synth_data <- data %>% filter(country %in% c("Turkey", donor_countries))
+synth_data <- data %>% filter(country %in% c("Macedonia", donor_countries))
 
 # Create numeric country id for Synth
 synth_data$country_id <- as.numeric(as.factor(synth_data$country))
@@ -108,7 +108,7 @@ dataprep.out <- dataprep(
   dependent = "cssmean",
   unit.variable = "country_id",
   time.variable = "year",
-  treatment.identifier = unique(synth_data_balanced$country_id[synth_data_balanced$country == "Turkey"]),
+  treatment.identifier = unique(synth_data_balanced$country_id[synth_data_balanced$country == "Macedonia"]),
   controls.identifier = unique(synth_data_balanced$country_id[synth_data_balanced$country %in% donor_countries]),
   time.predictors.prior = pre_period,
   time.optimize.ssr = pre_period,
@@ -121,17 +121,17 @@ synth.out <- synth(dataprep.out)
 # Plot results
 synth.plot <- path.plot(synth.res = synth.out, dataprep.res = dataprep.out,
                        Ylab = "CSS Mean", Xlab = "Year",
-                       Legend = c("Turkey", "Synthetic Turkey"),
+                       Legend = c("Macedonia", "Synthetic Macedonia"),
                        Legend.position = "bottomright")
 
 # Save plot
-png("synth_turkey_cssmean.png", width = 800, height = 500)
+png("synth_macedonia_cssmean.png", width = 800, height = 500)
 path.plot(synth.res = synth.out, dataprep.res = dataprep.out,
           Ylab = "CSS Mean", Xlab = "Year",
-          Legend = c("Turkey", "Synthetic Turkey"),
+          Legend = c("Macedonia", "Synthetic Macedonia"),
           Legend.position = "bottomright")
 dev.off()
-cat("Synthetic control plot saved as synth_turkey_cssmean.png\n")
+cat("Synthetic control plot saved as synth_macedonia_cssmean.png\n")
 
 # --- Custom plot with treatment-year vertical line and zoom ---
 # Determine appropriate zoom range
@@ -144,7 +144,7 @@ synth <- dataprep.out$Y0plot %*% synth.out$solution.w[ , 1]
 synth <- synth[which(dataprep.out$tag$time.plot %in% plot_years)]
 years <- plot_years
 
-treat_year <- 2013
+treat_year <- 2012
 
 plot_df <- data.frame(
   year = years,
@@ -158,15 +158,15 @@ p <- ggplot(plot_df_long, aes(x = year, y = CSSmean, color = Series)) +
   geom_line(size = 1) +
   geom_vline(xintercept = treat_year, linetype = "dashed", color = "red", size = 1) +
   scale_x_continuous(limits = c(plot_years_start, plot_years_end), breaks = seq(plot_years_start, plot_years_end, 2)) +
-  labs(title = "Synthetic Control: Turkey (CSSmean)",
+  labs(title = "Synthetic Control: Macedonia (CSSmean)",
        subtitle = paste("Vertical line: treatment year", treat_year),
        x = "Year", y = "CSS Mean") +
   theme_minimal(base_size = 14) +
   scale_color_manual(values = c("Actual" = "steelblue", "Synthetic" = "darkorange"))
 
 print(p)
-ggsave("synth_turkey_cssmean_zoomed.png", plot = p, width = 8, height = 5, dpi = 300)
-cat("Zoomed synthetic control plot saved as synth_turkey_cssmean_zoomed.png\n")
+ggsave("synth_macedonia_cssmean_zoomed.png", plot = p, width = 8, height = 5, dpi = 300)
+cat("Zoomed synthetic control plot saved as synth_macedonia_cssmean_zoomed.png\n")
 
 # Print unit weights
 cat("\nDonor country weights:\n")

@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Data is not redistributed via this repo (not for public/GitHub distribution,
+# and includes files too large for git). Kept locally only.
+Data/
+
+# Misc
+Rplots.pdf
+
+# Claude Code working directories (local session state, not for git)
+.claude/

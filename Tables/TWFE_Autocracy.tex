@@ -1,0 +1,44 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:twfe_autocracy} TWFE: CSS Mean and Autocracy (Lagged)}
+   \bigskip
+   \centering
+   \begin{tabular}{lccc}
+      \toprule
+       & \multicolumn{3}{c}{CSS Mean}\\
+                            & Lag 2          & Lag 3         & Lag 4 \\   
+                            & (1)            & (2)           & (3)\\  
+      \midrule 
+      Autocracy (t-2)       & 1.074$^{**}$   &               &   \\   
+                            & (0.4332)       &               &   \\   
+      log(GDP p.c.) (t-2)   & 0.3169         &               &   \\   
+                            & (0.7163)       &               &   \\   
+      log(Population) (t-2) & -2.795$^{***}$ &               &   \\   
+                            & (0.8990)       &               &   \\   
+      Autocracy (t-3)       &                & 1.171$^{***}$ &   \\   
+                            &                & (0.4362)      &   \\   
+      log(GDP p.c.) (t-3)   &                & 1.453$^{**}$  &   \\   
+                            &                & (0.7049)      &   \\   
+      log(Population) (t-3) &                & -2.360$^{**}$ &   \\   
+                            &                & (0.9796)      &   \\   
+      Autocracy (t-4)       &                &               & 1.413$^{***}$\\   
+                            &                &               & (0.4390)\\   
+      log(GDP p.c.) (t-4)   &                &               & 1.581$^{**}$\\   
+                            &                &               & (0.7635)\\   
+      log(Population) (t-4) &                &               & -1.976$^{*}$\\   
+                            &                &               & (1.045)\\   
+       \\
+      Observations          & 3,232          & 3,066         & 2,904\\  
+      R$^2$                 & 0.42816        & 0.44703       & 0.45040\\  
+      Adjusted R$^2$        & 0.38841        & 0.40740       & 0.40952\\  
+       \\
+      Country fixed effects & $\checkmark$   & $\checkmark$  & $\checkmark$\\   
+      Year fixed effects    & $\checkmark$   & $\checkmark$  & $\checkmark$\\   
+      \bottomrule
+   \end{tabular}
+   
+   \par \raggedright 
+   Heteroskedasticity-robust standard errors in parentheses. Dependent variable: CSS Mean. Autocracy = 1 if v2x\_regime $<$ 2.
+\end{table}
+
+

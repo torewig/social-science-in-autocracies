@@ -1,0 +1,50 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:twfe} TWFE: CSS Mean and Autocracy}
+   \bigskip
+   \centering
+   \begin{tabular}{lcccc}
+      \toprule
+       & \multicolumn{4}{c}{CSS Mean}\\
+                            & Contemp.       & Lag 2          & Lag 3         & Lag 4 \\   
+                            & (1)            & (2)            & (3)           & (4)\\  
+      \midrule 
+      Autocracy             & 0.4209         &                &               &   \\   
+                            & (0.4385)       &                &               &   \\   
+      log(GDP p.c.)         & -0.9371        &                &               &   \\   
+                            & (0.7128)       &                &               &   \\   
+      log(Population)       & -3.032$^{***}$ &                &               &   \\   
+                            & (0.8759)       &                &               &   \\   
+      Autocracy (t-2)       &                & 1.074$^{**}$   &               &   \\   
+                            &                & (0.4328)       &               &   \\   
+      log(GDP p.c.) (t-2)   &                & 0.3169         &               &   \\   
+                            &                & (0.7156)       &               &   \\   
+      log(Population) (t-2) &                & -2.795$^{***}$ &               &   \\   
+                            &                & (0.8980)       &               &   \\   
+      Autocracy (t-3)       &                &                & 1.171$^{***}$ &   \\   
+                            &                &                & (0.4357)      &   \\   
+      log(GDP p.c.) (t-3)   &                &                & 1.453$^{**}$  &   \\   
+                            &                &                & (0.7041)      &   \\   
+      log(Population) (t-3) &                &                & -2.360$^{**}$ &   \\   
+                            &                &                & (0.9785)      &   \\   
+      Autocracy (t-4)       &                &                &               & 1.413$^{***}$\\   
+                            &                &                &               & (0.4386)\\   
+      log(GDP p.c.) (t-4)   &                &                &               & 1.581$^{**}$\\   
+                            &                &                &               & (0.7627)\\   
+      log(Population) (t-4) &                &                &               & -1.976$^{*}$\\   
+                            &                &                &               & (1.044)\\   
+       \\
+      Observations          & 3,566          & 3,225          & 3,059         & 2,898\\  
+      R$^2$                 & 0.39383        & 0.42641        & 0.44414       & 0.44941\\  
+      Adjusted R$^2$        & 0.35550        & 0.38787        & 0.40565       & 0.40968\\  
+       \\
+      Country fixed effects & $\checkmark$   & $\checkmark$   & $\checkmark$  & $\checkmark$\\   
+      Year fixed effects    & $\checkmark$   & $\checkmark$   & $\checkmark$  & $\checkmark$\\   
+      \bottomrule
+   \end{tabular}
+   
+   \par \raggedright 
+   Heteroskedasticity-robust standard errors in parentheses. Dependent variable: CSS Mean. Autocracy = 1 if V-Dem regime type < 2.
+\end{table}
+
+

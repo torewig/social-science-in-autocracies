@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\caption{Comparison of ATT Estimates: Effect of Autocratization on Liberal Science Score}
+\label{tab:did_comparison_libscore}
+\begin{tabular}{lcccc}
+\toprule
+Method & ATT & SE & 95\% CI lower & 95\% CI upper \\
+\midrule
+TWFE (contemporaneous) & 0.087 & 0.714 & -1.312 & 1.487 \\
+TWFE (lag 2) & 1.397 & 0.674 & 0.075 & 2.719 \\
+TWFE (lag 3) & 2.009 & 0.691 & 0.654 & 3.364 \\
+Sun \& Abraham & 3.262 & 1.365 & 0.588 & 5.937 \\
+Callaway \& Sant'Anna & 3.008 & 2.831 & -2.540 & 8.557 \\
+Borusyak et al. & 1.539 & 1.295 & -0.999 & 4.077 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} TWFE estimated with country and year fixed effects, heteroskedasticity-robust SEs.
+Callaway \& Sant'Anna uses doubly-robust estimation with never-treated controls.
+Sun \& Abraham uses interaction-weighted estimation.
+Borusyak et al.\ uses imputation-based estimation (average of post-treatment horizons).
+\end{tablenotes}
+\end{table}

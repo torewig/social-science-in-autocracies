@@ -1,6 +1,6 @@
 # ============================================================================
-# Synth_Turkey_CSSmean.R
-# Synthetic control for Turkey: cssmean ~ autocracy
+# Synth_Serbia_CSSmean.R
+# Synthetic control for Serbia: cssmean ~ autocracy
 # ============================================================================
 
 if (!requireNamespace("Synth", quietly = TRUE)) install.packages("Synth")
@@ -12,17 +12,17 @@ library(ggplot2)
 input_path <- "Data/cy_operationalized.rds"
 data <- readRDS(input_path)
 
-# Filter for Turkey and donor pool (countries with no autocracy transition)
+# Filter for Serbia and donor pool (countries with no autocracy transition)
 data <- data %>% arrange(country, year)
 
-target_country <- data %>% filter(country == "Turkey")
+target_country <- data %>% filter(country == "Serbia")
 
-# Identify Turkey's transition year (first year autocracy == 1 after 0)
+# Identify Serbia's transition year (first year autocracy == 1 after 0)
 target_country <- target_country %>% mutate(autocracy_lag = lag(autocracy))
 transition_year <- target_country$year[which(target_country$autocracy_lag == 0 & target_country$autocracy == 1)[1]]
-if (is.na(transition_year)) stop("No autocracy transition found for Turkey.")
+if (is.na(transition_year)) stop("No autocracy transition found for Serbia.")
 
-cat("Transition year for Turkey:", transition_year, "\n")
+cat("Transition year for Serbia:", transition_year, "\n")
 
 # Define pre- and post-treatment periods
 pre_period <- min(target_country$year):(transition_year - 1)
@@ -32,10 +32,15 @@ post_period <- transition_year:max(target_country$year)
 donor_countries <- data %>% group_by(country) %>% summarise(max_autocracy = max(autocracy, na.rm = TRUE)) %>% filter(max_autocracy == 0) %>% pull(country)
 
 # Prepare data for Synth
-synth_data <- data %>% filter(country %in% c("Turkey", donor_countries))
+synth_data <- data %>% filter(country %in% c("Serbia", donor_countries))
 
-# Create numeric country id for Synth
-synth_data$country_id <- as.numeric(as.factor(synth_data$country))
+# Create numeric country id for Synth - create a stable mapping
+country_id_map <- data.frame(country = unique(synth_data$country), stringsAsFactors = FALSE)
+country_id_map$country_id <- seq_len(nrow(country_id_map))
+synth_data <- left_join(synth_data, country_id_map, by = "country")
+
+# Store the treated unit ID before any filtering
+serbia_id <- unique(synth_data$country_id[synth_data$country == "Serbia"])
 
 # --- Balance the panel for Synth ---
 # Get the full set of years in the analysis window
@@ -48,8 +53,9 @@ complete_panel <- expand.grid(country = all_countries, year = all_years, strings
 # Merge with synth_data to fill in missing years with NA
 synth_data_balanced <- merge(complete_panel, synth_data, by = c("country", "year"), all.x = TRUE)
 
-# Recreate country_id
-synth_data_balanced$country_id <- as.numeric(as.factor(synth_data_balanced$country))
+# Add country_id back using the stable mapping (remove if it exists from merge)
+synth_data_balanced$country_id <- NULL
+synth_data_balanced <- left_join(synth_data_balanced, country_id_map, by = "country")
 
 # Remove countries with too many missing pre-period cssmean (e.g., more than 2 missing in pre-period)
 pre_period_mask <- synth_data_balanced$year %in% pre_period
@@ -72,13 +78,14 @@ country_years <- synth_data_balanced %>%
   summarise(n_years = n(), n_nonmiss = sum(!is.na(cssmean)))
 
 n_pre_years <- length(pre_period_years)
-good_countries <- country_years %>% filter(n_years == n_pre_years & n_nonmiss == n_pre_years) %>% pull(country)
-
-# Restrict to only these countries
-synth_data_balanced <- synth_data_balanced %>% filter(country %in% good_countries)
+# For donor pool: require complete data
+good_donor_countries <- country_years %>% filter(n_years == n_pre_years & n_nonmiss == n_pre_years) %>% pull(country)
 
 # Update donor_countries to only those with complete pre-period data
-donor_countries <- intersect(donor_countries, good_countries)
+donor_countries <- intersect(donor_countries, good_donor_countries)
+
+# Keep Serbia and the good donor countries
+synth_data_balanced <- synth_data_balanced %>% filter(country %in% c("Serbia", donor_countries))
 
 cat("Number of donor countries:", length(donor_countries), "\n")
 
@@ -89,18 +96,44 @@ pre_means <- synth_data_balanced %>%
   group_by(country) %>%
   summarise(pre_cssmean = mean(cssmean, na.rm = TRUE))
 
+# Convert NaN to NA and check
+pre_means$pre_cssmean[is.nan(pre_means$pre_cssmean)] <- NA
+
+# Remove pre_cssmean if it already exists before joining
+if ("pre_cssmean" %in% names(synth_data_balanced)) {
+  synth_data_balanced$pre_cssmean <- NULL
+}
 synth_data_balanced <- left_join(synth_data_balanced, pre_means, by = "country")
 
-# Now run Synth with pre_cssmean as the predictor
-# Remove any units with missing pre_cssmean
-synth_data_balanced <- synth_data_balanced %>% filter(!is.na(pre_cssmean))
+# Check if Serbia is still in the dataset
+if (!"Serbia" %in% synth_data_balanced$country) {
+  stop("Serbia was removed during data preparation. Check Serbia data availability.")
+}
 
-# Prepare predictors matrix for dataprep
-predictor_matrix <- synth_data_balanced %>%
-  select(country_id, pre_cssmean) %>%
-  distinct()
+# Check if Serbia has valid pre_cssmean
+serbia_check <- synth_data_balanced %>% filter(country == "Serbia") %>% select(pre_cssmean) %>% distinct()
+if (nrow(serbia_check) == 0 || all(is.na(serbia_check$pre_cssmean))) {
+  stop("Serbia has no valid pre_cssmean values. All cssmean values in pre-period are missing.")
+}
 
 # Run dataprep with pre_cssmean as predictor
+# Get the control IDs (all donor countries that remain after filtering)
+control_ids <- unique(synth_data_balanced$country_id[synth_data_balanced$country %in% donor_countries])
+
+# Verify we have a single treated unit
+treated_id <- unique(synth_data_balanced$country_id[synth_data_balanced$country == "Serbia"])
+cat("Number of treated IDs found:", length(treated_id), "\n")
+if (length(treated_id) != 1) {
+  cat("Serbia entries in synth_data_balanced:\n")
+  print(table(synth_data_balanced$country == "Serbia"))
+  cat("Unique country_id values for Serbia:\n")
+  print(synth_data_balanced$country_id[synth_data_balanced$country == "Serbia"])
+  stop("Multiple or no treated unit IDs found for Serbia")
+}
+
+cat("Treated unit ID (Serbia):", treated_id, "\n")
+cat("Number of control units:", length(control_ids), "\n")
+
 dataprep.out <- dataprep(
   foo = synth_data_balanced,
   predictors = "pre_cssmean",
@@ -108,8 +141,8 @@ dataprep.out <- dataprep(
   dependent = "cssmean",
   unit.variable = "country_id",
   time.variable = "year",
-  treatment.identifier = unique(synth_data_balanced$country_id[synth_data_balanced$country == "Turkey"]),
-  controls.identifier = unique(synth_data_balanced$country_id[synth_data_balanced$country %in% donor_countries]),
+  treatment.identifier = treated_id,
+  controls.identifier = control_ids,
   time.predictors.prior = pre_period,
   time.optimize.ssr = pre_period,
   unit.names.variable = "country",
@@ -121,17 +154,17 @@ synth.out <- synth(dataprep.out)
 # Plot results
 synth.plot <- path.plot(synth.res = synth.out, dataprep.res = dataprep.out,
                        Ylab = "CSS Mean", Xlab = "Year",
-                       Legend = c("Turkey", "Synthetic Turkey"),
+                       Legend = c("Serbia", "Synthetic Serbia"),
                        Legend.position = "bottomright")
 
 # Save plot
-png("synth_turkey_cssmean.png", width = 800, height = 500)
+png("synth_serbia_cssmean.png", width = 800, height = 500)
 path.plot(synth.res = synth.out, dataprep.res = dataprep.out,
           Ylab = "CSS Mean", Xlab = "Year",
-          Legend = c("Turkey", "Synthetic Turkey"),
+          Legend = c("Serbia", "Synthetic Serbia"),
           Legend.position = "bottomright")
 dev.off()
-cat("Synthetic control plot saved as synth_turkey_cssmean.png\n")
+cat("Synthetic control plot saved as synth_serbia_cssmean.png\n")
 
 # --- Custom plot with treatment-year vertical line and zoom ---
 # Determine appropriate zoom range
@@ -144,7 +177,7 @@ synth <- dataprep.out$Y0plot %*% synth.out$solution.w[ , 1]
 synth <- synth[which(dataprep.out$tag$time.plot %in% plot_years)]
 years <- plot_years
 
-treat_year <- 2013
+treat_year <- 2014
 
 plot_df <- data.frame(
   year = years,
@@ -158,15 +191,15 @@ p <- ggplot(plot_df_long, aes(x = year, y = CSSmean, color = Series)) +
   geom_line(size = 1) +
   geom_vline(xintercept = treat_year, linetype = "dashed", color = "red", size = 1) +
   scale_x_continuous(limits = c(plot_years_start, plot_years_end), breaks = seq(plot_years_start, plot_years_end, 2)) +
-  labs(title = "Synthetic Control: Turkey (CSSmean)",
+  labs(title = "Synthetic Control: Serbia (CSSmean)",
        subtitle = paste("Vertical line: treatment year", treat_year),
        x = "Year", y = "CSS Mean") +
   theme_minimal(base_size = 14) +
   scale_color_manual(values = c("Actual" = "steelblue", "Synthetic" = "darkorange"))
 
 print(p)
-ggsave("synth_turkey_cssmean_zoomed.png", plot = p, width = 8, height = 5, dpi = 300)
-cat("Zoomed synthetic control plot saved as synth_turkey_cssmean_zoomed.png\n")
+ggsave("synth_serbia_cssmean_zoomed.png", plot = p, width = 8, height = 5, dpi = 300)
+cat("Zoomed synthetic control plot saved as synth_serbia_cssmean_zoomed.png\n")
 
 # Print unit weights
 cat("\nDonor country weights:\n")

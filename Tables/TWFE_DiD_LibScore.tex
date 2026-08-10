@@ -1,0 +1,50 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:twfe_libscore} TWFE: Liberal Science Score and Autocracy}
+   \bigskip
+   \centering
+   \begin{tabular}{lcccc}
+      \toprule
+       & \multicolumn{4}{c}{Liberal Science Score}\\
+                            & Contemp.       & Lag 2          & Lag 3          & Lag 4 \\   
+                            & (1)            & (2)            & (3)            & (4)\\  
+      \midrule 
+      Autocracy             & 0.0873         &                &                &   \\   
+                            & (0.7140)       &                &                &   \\   
+      log(GDP p.c.)         & -3.460$^{***}$ &                &                &   \\   
+                            & (1.182)        &                &                &   \\   
+      log(Population)       & -2.353$^{*}$   &                &                &   \\   
+                            & (1.352)        &                &                &   \\   
+      Autocracy (t-2)       &                & 1.397$^{**}$   &                &   \\   
+                            &                & (0.6744)       &                &   \\   
+      log(GDP p.c.) (t-2)   &                & -1.329         &                &   \\   
+                            &                & (1.140)        &                &   \\   
+      log(Population) (t-2) &                & -3.676$^{***}$ &                &   \\   
+                            &                & (1.404)        &                &   \\   
+      Autocracy (t-3)       &                &                & 2.009$^{***}$  &   \\   
+                            &                &                & (0.6911)       &   \\   
+      log(GDP p.c.) (t-3)   &                &                & -0.0560        &   \\   
+                            &                &                & (1.175)        &   \\   
+      log(Population) (t-3) &                &                & -4.289$^{***}$ &   \\   
+                            &                &                & (1.510)        &   \\   
+      Autocracy (t-4)       &                &                &                & 2.655$^{***}$\\   
+                            &                &                &                & (0.6880)\\   
+      log(GDP p.c.) (t-4)   &                &                &                & 0.5471\\   
+                            &                &                &                & (1.175)\\   
+      log(Population) (t-4) &                &                &                & -3.506$^{**}$\\   
+                            &                &                &                & (1.522)\\   
+       \\
+      Observations          & 3,560          & 3,221          & 3,056          & 2,896\\  
+      R$^2$                 & 0.35896        & 0.40879        & 0.42344        & 0.42629\\  
+      Adjusted R$^2$        & 0.31856        & 0.36922        & 0.38370        & 0.38508\\  
+       \\
+      Country fixed effects & $\checkmark$   & $\checkmark$   & $\checkmark$   & $\checkmark$\\   
+      Year fixed effects    & $\checkmark$   & $\checkmark$   & $\checkmark$   & $\checkmark$\\   
+      \bottomrule
+   \end{tabular}
+   
+   \par \raggedright 
+   Heteroskedasticity-robust standard errors in parentheses. Dependent variable: Liberal Science Score. Autocracy = 1 if V-Dem regime type < 2.
+\end{table}
+
+

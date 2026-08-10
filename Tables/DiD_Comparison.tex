@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\caption{Comparison of ATT Estimates: Effect of Autocratization on CSS Mean}
+\label{tab:did_comparison}
+\begin{tabular}{lcccc}
+\toprule
+Method & ATT & SE & 95\% CI lower & 95\% CI upper \\
+\midrule
+TWFE (contemporaneous) & 0.421 & 0.439 & -0.439 & 1.280 \\
+TWFE (lag 2) & 1.074 & 0.433 & 0.226 & 1.923 \\
+TWFE (lag 3) & 1.171 & 0.436 & 0.317 & 2.025 \\
+Callaway \& Sant'Anna & 2.039 & 1.813 & -1.514 & 5.592 \\
+Sun \& Abraham & 1.644 & 0.561 & 0.545 & 2.743 \\
+Borusyak et al. & 1.017 & 0.974 & -0.892 & 2.927 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} TWFE estimated with country and year fixed effects, heteroskedasticity-robust SEs.
+Callaway \& Sant'Anna uses doubly-robust estimation with never-treated controls.
+Sun \& Abraham uses interaction-weighted estimation.
+Borusyak et al.\ uses imputation-based estimation (average of post-treatment horizons).
+\end{tablenotes}
+\end{table}
