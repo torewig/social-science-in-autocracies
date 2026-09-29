@@ -12,3 +12,11 @@ Rplots.pdf
 
 # Claude Code working directories (local session state, not for git)
 .claude/
+
+# Meeting notes stay local (ADMIN/DECISIONS.md, D-06)
+20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]_*.md
+# Reference documents (PDFs) in hedging/ are not redistributed
+hedging/*.pdf
+# Windows/Dropbox litter
+desktop.ini
+~$*
